@@ -26,8 +26,9 @@ Route::middleware([
     // Route::get('/', function () {
     //     return view('livewire.projects');
     // })->name('projects');
-    Route::get('/', [Projects::class, 'render'])
-    ->name('projects');
+    Route::get('/', function() {
+        return view('home');
+    })->name('projects');
 });
 
 // Route: '/' - Home, login page if not auth, projects list if auth

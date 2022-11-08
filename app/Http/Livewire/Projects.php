@@ -5,10 +5,14 @@ namespace App\Http\Livewire;
 use App\Models\Project;
 use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Request;
 
 class Projects extends Component
 {
     public $readyToLoad = false;
+    public $project_name;
+
+    protected $listeners = ['projectAdded' => '$refresh'];
 
     public function loadProjects()
     {
@@ -24,5 +28,14 @@ class Projects extends Component
                 ->get()
                 : [],
         ]);
+    }
+
+    public function store()
+    {
+        // dd($this);
+        if($this->project_name != null) {
+            Project::create($this->project_name);
+        }
+        // $this->emit('projectadded');
     }
 }
