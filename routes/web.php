@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Livewire\Projects;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,7 +15,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('login');
 });
 
 Route::middleware([
@@ -22,7 +23,14 @@ Route::middleware([
     config('jetstream.auth_session'),
     'verified'
 ])->group(function () {
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
+    // Route::get('/', function () {
+    //     return view('livewire.projects');
+    // })->name('projects');
+    Route::get('/', [Projects::class, 'render'])
+    ->name('projects');
 });
+
+// Route: '/' - Home, login page if not auth, projects list if auth
+// // View: 'login' & 'projects'
+// Route: '/project/{project_name} - looking into a project
+// Route: '/project/{project_name}/{list_name} - looking at a list
