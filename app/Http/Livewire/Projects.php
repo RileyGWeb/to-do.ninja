@@ -32,10 +32,8 @@ class Projects extends Component
 
     public function store()
     {
-        // dd($this);
         if($this->project_name != null) {
             Project::create($this->project_name);
         }
-        // $this->emit('projectadded');
     }
 }

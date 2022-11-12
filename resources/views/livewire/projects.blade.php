@@ -3,9 +3,9 @@
         <h1 class="text-4xl text-center mb-4">Projects</h1>
         <div id="projects" class="grid grid-cols-5 gap-4">
             @foreach($projects as $val)
-                <div id="project" class="h-full w-full border-2 border-gray-300 aspect-square rounded-[1.25rem] text-2xl flex items-center justify-center text-slate-500 cursor-pointer select-none hover:bg-gray-200 transition-all">
+                <a href="/project/{{ $val['id'] }}" id="project" class="h-full w-full border-2 border-gray-300 aspect-square rounded-[1.25rem] text-2xl flex items-center justify-center text-slate-500 cursor-pointer select-none hover:bg-gray-200 transition-all">
                     {{ $val['name'] }}
-                </div>
+                </a>
             @endforeach
             <div id="project_add" class="h-full w-full border-dashed border-2 border-gray-300 aspect-square rounded-[1.25rem] text-8xl flex items-center justify-center text-slate-300 cursor-pointer select-none hover:bg-gray-200 hover:text-slate-500 hover:border-gray-300 hover:border-solid transition-all" type="button" data-modal-toggle="addProjectModal"  onClick="clearText()">
                 +

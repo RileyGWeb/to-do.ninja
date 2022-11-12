@@ -29,6 +29,12 @@ Route::middleware([
     Route::get('/', function() {
         return view('home');
     })->name('projects');
+    Route::get('/project', function() {
+        return redirect('/');
+    });
+    Route::get('/project/{project_id}', function() {
+        return view('project-view');
+    });
 });
 
 // Route: '/' - Home, login page if not auth, projects list if auth
