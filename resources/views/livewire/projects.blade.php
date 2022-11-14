@@ -3,7 +3,7 @@
         <h1 class="text-4xl text-center mb-4">Projects</h1>
         <div id="projects" class="grid grid-cols-5 gap-4">
             @foreach($projects as $val)
-                <a href="/project/{{ $val['id'] }}" id="project" class="h-full w-full border-2 border-gray-300 aspect-square rounded-[1.25rem] text-2xl flex items-center justify-center text-slate-500 cursor-pointer select-none hover:bg-gray-200 transition-all">
+                <a href="/project-{{ $val['id'] }}/list-1" id="project" class="h-full w-full border-2 border-gray-300 aspect-square rounded-[1.25rem] text-2xl flex items-center justify-center text-slate-500 cursor-pointer select-none hover:bg-gray-200 transition-all">
                     {{ $val['name'] }}
                 </a>
             @endforeach
@@ -33,7 +33,7 @@
                     <form class="space-y-6" wire:submit.prevent="store">
                         @csrf
 
-                        <input type="project_name" wire:model="project_name" name="project_name" id="project_name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="Very important project" required>
+                        <input wire:model="project_name" name="project_name" id="project_name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="Very important project" required>
                         <button type="submit" class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" data-modal-toggle="addProjectModal">Oh yeah</button>
                     </form>
                 </div>

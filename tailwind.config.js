@@ -14,7 +14,11 @@ module.exports = {
         extend: {
             fontFamily: {
                 sans: ['Nunito', ...defaultTheme.fontFamily.sans],
+                julius: ['"Julius Sans One"', 'sans-serif']
             },
+            backgroundImage: {
+                'yellow-gradient': "background: linear-gradient(99.92deg, #FFE000 0.39%, #FFC200 100.39%);",
+            }
         },
     },
 

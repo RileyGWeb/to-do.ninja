@@ -2,6 +2,7 @@
 
 use App\Http\Livewire\Projects;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Request;
 
 /*
 |--------------------------------------------------------------------------
@@ -32,9 +33,23 @@ Route::middleware([
     Route::get('/project', function() {
         return redirect('/');
     });
-    Route::get('/project/{project_id}', function() {
-        return view('project-view');
-    });
+    Route::get('/project-{project_id}/list-{list_id}', function() {
+        // Grabs the URL and uses it to detirmine what project and list are currently selected
+        $URLpieces = explode('/', Request::url());
+        $projectAndList = array_slice($URLpieces, -2, 2, true);
+        foreach($projectAndList as $val) {
+            $pieces = explode('-', $val);
+    
+            if ($pieces[0] == 'project') {
+                $selectedProject = $pieces[1];
+            } 
+            
+            if ($pieces[0] == 'list') {
+                $selectedList = $pieces[1];
+            }
+        }
+        return view('project-view', ['selectedProject' => $selectedProject, 'selectedList' => $selectedList]);
+    })->name('project-view');
 });
 
 // Route: '/' - Home, login page if not auth, projects list if auth
