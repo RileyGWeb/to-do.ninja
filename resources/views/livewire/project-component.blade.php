@@ -19,7 +19,7 @@
                     </div>
                 </div>
                 @foreach($lists as $val)
-                    <livewire:list-item name="{{ $val->name }}" listId="{{ $val->id }}" projectId="{{ $selectedProject }}" wire:key="list-item-{{ $val->id }}" />
+                    <livewire:list-item name="{{ $val->name }}" listId="{{ $val->id }}" selectedList="{{ $selectedList }}" projectId="{{ $selectedProject }}" wire:key="list-item-{{ $val->id }}" />
                 @endforeach
             </div>
         </div>

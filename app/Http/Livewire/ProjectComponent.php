@@ -26,7 +26,7 @@ class ProjectComponent extends Component
         ->where('project_id', $this->selectedProject)
         ->orderByDesc('created_at')
         ->get();
-        // dd($this->selectedProject);
+        
         return view('livewire.project-component');
     }
 
