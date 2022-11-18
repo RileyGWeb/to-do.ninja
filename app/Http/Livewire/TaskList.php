@@ -12,6 +12,7 @@ class TaskList extends Component
     public $selectedProject;
     public $selectedList;
     public $tasks;
+    public $new_item_name;
 
     public function render()
     {   
@@ -19,7 +20,14 @@ class TaskList extends Component
         ->where('project_id', $this->selectedProject)
         ->where('list_id', $this->selectedList)
         ->get();
-        // dd($lists, Auth::id(), $this->selectedProject);
+        
         return view('livewire.task-list');
+    }
+
+    public function store()
+    {
+        if($this->new_item_name != null) {
+            Item::create($this->new_item_name, $this->selectedProject, $this->selectedList);
+        }
     }
 }

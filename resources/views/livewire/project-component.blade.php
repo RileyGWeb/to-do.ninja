@@ -1,6 +1,6 @@
 <div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 h-full">
     <h1 class="text-4xl text-center mb-4">{{ $project[0]->name }}</h1>
-    <div id="project_view" class="flex border border-gray-400 rounded-[2rem] p-4 sm:p-6 sm:pt-12 min-h-[500px]">
+    <div id="project_view" class="flex border border-gray-400 rounded-[2rem] p-4 sm:p-6 min-h-[500px]">
         <div id="project_lists" class="flex flex-col border-r border-gray-400 pr-4 sm:pr-6">
             <div id="title_area" class="flex w-64 relative h-9 items-center mb-6">
                 <h2 class="w-full text-center text-2xl font-julius">Lists</h2>
@@ -19,7 +19,7 @@
                     </div>
                 </div>
                 @foreach($lists as $val)
-                    <livewire:list-item name="{{ $val->name }}" wire:key="list-item-{{ $val->id }}" />
+                    <livewire:list-item name="{{ $val->name }}" listId="{{ $val->id }}" projectId="{{ $selectedProject }}" wire:key="list-item-{{ $val->id }}" />
                 @endforeach
             </div>
         </div>
