@@ -13,7 +13,11 @@ class TaskList extends Component
     public $selectedList;
     public $listName;
     public $tasks;
-    public $new_item_name;
+    public $new_item_name = null;
+
+    public $listeners = [
+        'refreshTasklist'
+    ];
 
     public function render()
     {   
@@ -33,6 +37,16 @@ class TaskList extends Component
     {
         if($this->new_item_name != null) {
             Item::create($this->new_item_name, $this->selectedProject, $this->selectedList);
+            $this->new_item_name = null;
         }
+    }
+
+    public function refreshTasklist($listId)
+    {
+        $this->selectedList = $listId;
+        $this->tasks = Item::where('user_id', Auth::id())
+        ->where('project_id', $this->selectedProject)
+        ->where('list_id', $this->selectedList)
+        ->get();
     }
 }

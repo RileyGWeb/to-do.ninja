@@ -8,7 +8,7 @@
             </div>
             <div id="project_lists" class="flex flex-col gap-2" >
                 <div id="new_list_entry" class="flex bg-gray-200 rounded-full px-4 h-8 cursor-pointer hidden" >
-                    <form wire:submit.prevent="store">
+                    <form wire:submit.prevent="store" onsubmit="formAdded()">
                         @csrf
 
                         <input id="new_list_input" type="text" name="new_list_name" class="h-full border-none bg-transparent p-0 focus:border-none focus:ring-0" placeholder="Name your list..." wire:model.defer="new_list_name">
@@ -35,9 +35,44 @@
         var newListInput = document.getElementById("new_list_input");
 
         addListButton.addEventListener("click", function() {
+            newListInput.value = '';
             newListEntry.classList.remove("hidden");
             newListInput.focus();
         });
+
+
+
+        function switchList(listId) {
+
+            var allLists = document.querySelectorAll('.list');
+            allLists.forEach( (list) => {
+                list.classList.remove('border-2', 'border-gray-400', 'shadow');
+            })
+            document.querySelector('[listId="' + listId + '"]').classList.add('border-2', 'border-gray-400', 'shadow');
+
+            var selectedProjectId = @js($selectedProject);
+            var url = '/project-' + selectedProjectId + '/list-' + listId;
+            history.pushState({}, '', url);
+
+            showTaskEntry();
+        }
+
+        function showTaskEntry() {
+            var taskEntry = document.getElementById('new_item').classList.remove('hidden');  
+            console.log(taskEntry)
+        }
+        document.querySelector(".list").addEventListener("click", function() {
+            showTaskEntry();
+        });
+        
+        // If the URL contains 'list', that means a list is selected and we need to show the "add task" area
+        if (window.location.href.indexOf('list') != -1) {
+            showTaskEntry();
+        }
+
+        function formAdded() {
+            
+        }
 
     </script>
 </div>

@@ -29,4 +29,11 @@ class ListItem extends Component
         
         return view('livewire.list-item');
     }
+
+    public function switchList($listId)
+    {
+        // change active list, which means refreshing the task-list component and passing a new selectedProject and selectedList
+        $this->emit('refreshTasklist', $listId);
+        // change url
+    }
 }

@@ -33,6 +33,12 @@ Route::middleware([
     Route::get('/project', function() {
         return redirect('/');
     });
+    Route::get('/project-{project_id}', function() {
+        $URLpieces = explode('-', Request::url());
+        $selectedProject = $URLpieces[1];
+
+        return view('project-view', ['selectedProject' => $selectedProject, 'selectedList' => null]);
+    });
     Route::get('/project-{project_id}/list-{list_id}', function() {
         // Grabs the URL and uses it to detirmine what project and list are currently selected
         $URLpieces = explode('/', Request::url());
