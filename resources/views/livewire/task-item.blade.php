@@ -1,4 +1,4 @@
-<div id="item" class="bg-white rounded-full border border-gray-300 mb-2 flex cursor-pointer @if($deleted) hidden @endif pointer-events-none hover:border-red-600">
+<div id="item" class="bg-white rounded-full border border-gray-300 mb-2 flex cursor-pointer @if($deleted) hidden @endif">
     <div id="completion_tap_target" class="flex grow p-2 group" wire:click="completeItem({{ $taskId }})">
         @if ($completed)
             <div id="checkbox" class="h-6 w-6 border-gray-200 bg-gradient-to-r from-[#FFE000] to-[#FFC200] flex items-center justify-center rounded-full">
@@ -15,7 +15,7 @@
         <div id="more">
             <img src="../images/dropdown-arrow.svg" alt="">
         </div>
-        <div id="delete" class="group pointer-events-auto" wire:click="deleteItem({{ $taskId }})">
+        <div id="delete" class="group" wire:click="deleteItem({{ $taskId }})">
             <img src="../images/trash.svg" alt="" class="group-hover:invert-[50]">
         </div>
     </div>
