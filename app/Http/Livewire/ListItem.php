@@ -14,6 +14,9 @@ class ListItem extends Component
     public $totalItems;
     public $totalCompleted = 0;
     public $selectedList;
+    public $completed = false;
+
+    public $listeners = ['refreshListItem' => '$refresh'];
 
     public function render()
     {
@@ -21,10 +24,16 @@ class ListItem extends Component
             ->where('list_id', $this->listId)
             ->get();
         $this->totalItems = count($items);
+        $this->totalCompleted = 0;
         foreach($items as $val) {
             if ($val->completed == 1) {
                 $this->totalCompleted += 1;
             }
+        }
+        if($this->totalItems == $this->totalCompleted && $this->totalItems > 0) {
+            $this->completed = true;
+        } else {
+            $this->completed = false;
         }
         
         return view('livewire.list-item');
@@ -34,6 +43,8 @@ class ListItem extends Component
     {
         // change active list, which means refreshing the task-list component and passing a new selectedProject and selectedList
         $this->emit('refreshTasklist', $listId);
+        $this->selectedList = $listId;
+        // dd($this->selectedList);
         // change url
     }
 }

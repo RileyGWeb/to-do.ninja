@@ -49,6 +49,7 @@
                 list.classList.remove('border-2', 'border-gray-400', 'shadow');
             })
             document.querySelector('[listId="' + listId + '"]').classList.add('border-2', 'border-gray-400', 'shadow');
+            console.log(listId);
 
             var selectedProjectId = @js($selectedProject);
             var url = '/project-' + selectedProjectId + '/list-' + listId;

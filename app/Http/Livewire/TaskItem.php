@@ -34,6 +34,8 @@ class TaskItem extends Component
             $this->completed = 0;
         }
 
+        $this->emit('refreshListItem');
+
     }
 
     public function deleteItem($taskId)

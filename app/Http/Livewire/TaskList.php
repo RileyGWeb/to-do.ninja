@@ -39,6 +39,7 @@ class TaskList extends Component
             Item::create($this->new_item_name, $this->selectedProject, $this->selectedList);
             $this->new_item_name = null;
         }
+        $this->emit('refreshListItem');
     }
 
     public function refreshTasklist($listId)
