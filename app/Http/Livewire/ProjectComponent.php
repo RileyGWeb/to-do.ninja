@@ -15,7 +15,7 @@ class ProjectComponent extends Component
     public $selectedProject;
     public $selectedList;
 
-    protected $listeners = ['refreshComponent' => '$refresh'];
+    protected $listeners = ['refreshListSection' => '$refresh'];
 
     public function render()
     {

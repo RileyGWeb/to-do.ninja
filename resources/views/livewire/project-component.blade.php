@@ -18,9 +18,7 @@
                         <img src="../images/arrow-right.svg" alt="">
                     </div>
                 </div>
-                @foreach($lists as $val)
-                    <livewire:list-item name="{{ $val->name }}" listId="{{ $val->id }}" selectedList="{{ $selectedList }}" projectId="{{ $selectedProject }}" wire:key="list-item-{{ $val->id }}" />
-                @endforeach
+                <livewire:list-section :lists=$lists selectedList="{{ $selectedList }}" projectId="{{ $selectedProject }}" />
             </div>
         </div>
         <div id="list_view" class="pl-4 sm:pl-6 w-full">

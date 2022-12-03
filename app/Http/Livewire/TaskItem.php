@@ -34,7 +34,8 @@ class TaskItem extends Component
             $this->completed = 0;
         }
 
-        $this->emit('refreshListItem');
+        // $this->emit('refreshListItem');
+        $this->emitUp('refreshListSection');
 
     }
 

@@ -16,7 +16,7 @@ class ListItem extends Component
     public $selectedList;
     public $completed = false;
 
-    public $listeners = ['refreshListItem' => '$refresh'];
+    // public $listeners = ['refreshListItem' => '$refresh'];
 
     public function render()
     {
