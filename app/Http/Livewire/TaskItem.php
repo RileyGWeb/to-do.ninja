@@ -11,6 +11,7 @@ class TaskItem extends Component
     public $name;
     public $completed;
     public $taskId;
+    public $listId;
     public $deleted = false;
 
     public function render()
@@ -34,8 +35,9 @@ class TaskItem extends Component
             $this->completed = 0;
         }
 
-        // $this->emit('refreshListItem');
-        $this->emitUp('refreshListSection');
+        $this->emit('refreshTasklist', $this->listId);
+        $this->emit('refreshListItem');
+        $this->emit('refreshListSection');
 
     }
 
@@ -46,5 +48,8 @@ class TaskItem extends Component
             ->delete();
         
         $this->deleted = true;
+        $this->emit('refreshTasklist', $this->listId);
+        $this->emit('refreshListItem');
+        $this->emit('refreshListSection');
     }
 }

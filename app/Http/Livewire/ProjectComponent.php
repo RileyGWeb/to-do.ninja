@@ -15,8 +15,6 @@ class ProjectComponent extends Component
     public $selectedProject;
     public $selectedList;
 
-    protected $listeners = ['refreshListSection' => '$refresh'];
-
     public function render()
     {
         $this->project = Project::where('user_id', Auth::id())
@@ -35,5 +33,6 @@ class ProjectComponent extends Component
         if($this->new_list_name != null) {
             ItemList::create($this->new_list_name, $this->selectedProject);
         }
+        $this->emit('refreshListSection');
     }
 }

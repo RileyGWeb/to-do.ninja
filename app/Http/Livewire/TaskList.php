@@ -40,6 +40,7 @@ class TaskList extends Component
             $this->new_item_name = null;
         }
         $this->emit('refreshListItem');
+        $this->emit('refreshListSection');
     }
 
     public function refreshTasklist($listId)

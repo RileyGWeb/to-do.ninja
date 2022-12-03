@@ -5,10 +5,27 @@
         <button type="submit" class="bg-gradient-to-r from-[#FFE000] to-[#FFC200] text-white font-bold rounded-full px-6 whitespace-nowrap" onClick="clearText()">Add task</button>
         <input type="submit" class="hidden">
     </form>
-    <hr class="mx-12 my-4">
+    <hr class="mx-12 my-4 border-gray-300">
     <div id="list_items">
         @foreach($tasks as $task)
-            <livewire:task-item name="{{ $task->name }}" completed="{{ $task->completed }}" taskId="{{ $task->id }}" wire:key="task-item-{{ $task->id }}" />
+            @if(!$task->completed)
+                <livewire:task-item name="{{ $task->name }}" completed="{{ $task->completed }}" taskId="{{ $task->id }}" listId="{{ $selectedList }}" wire:key="task-item-{{ $task->id }}" />
+            @endif
+        @endforeach
+        
+        @foreach($tasks as $task)
+            <div id="completed_seperator" class="flex items-center mb-2 mt-6">
+                <hr class="w-8 border-gray-500">
+                <span class="mx-2 text-gray-500">Completed</span> 
+                <hr class="w-full border-gray-500">
+            </div>
+            @break
+        @endforeach
+        
+        @foreach($tasks as $task)
+            @if($task->completed)
+                <livewire:task-item name="{{ $task->name }}" completed="{{ $task->completed }}" taskId="{{ $task->id }}" listId="{{ $selectedList }}" wire:key="task-item-{{ $task->id }}" />
+            @endif
         @endforeach
     </div>
     
