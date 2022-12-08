@@ -71,5 +71,8 @@
             formInput.select();
         }
 
+        // Dragula
+        dragula([document.querySelector('#incomplete_lists')]);
+
     </script>
 </div>
