@@ -36,7 +36,6 @@
                 list.classList.remove('border-2', 'border-gray-400', 'shadow');
             })
             document.querySelector('[listId="' + listId + '"]').classList.add('border-2', 'border-gray-400', 'shadow');
-            console.log(listId);
 
             var selectedProjectId = @js($selectedProject);
             var url = '/project-' + selectedProjectId + '/list-' + listId;
@@ -46,8 +45,10 @@
         }
 
         function showTaskEntry() {
-            var taskEntry = document.getElementById('new_item').classList.remove('hidden');  
-            console.log(taskEntry)
+            var urlSlugs = location.pathname.split('/').slice(1);
+            if (urlSlugs[1].includes('list')) { 
+                var taskEntry = document.getElementById('new_item').classList.remove('hidden');  
+            }
         }
         document.querySelector(".list").addEventListener("click", function() {
             showTaskEntry();

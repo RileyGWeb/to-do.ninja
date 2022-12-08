@@ -59,7 +59,8 @@ class ListItem extends Component
         $this->touch = true;
         $this->selectedList = $listId;
         $this->emit('refreshTasklist', $listId);
-        $this->emit('refreshListSection');
+        $this->emit('updateSelectedList', $listId);
+        
         // change url
     }
 

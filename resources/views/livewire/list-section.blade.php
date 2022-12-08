@@ -1,6 +1,6 @@
 <div>
     <div id="new_list_entry" class="list flex bg-gray-200 pl-4 h-8 items-center rounded-full mb-2 hidden" >
-        <form wire:submit.prevent="store" onsubmit="formAdded()">
+        <form wire:submit.prevent="store">
             @csrf
 
             <input id="new_list_input" type="text" name="new_list_name" class="h-full border-none bg-transparent p-0 focus:border-none focus:ring-0" placeholder="Name your list..." wire:model.defer="new_list_name">

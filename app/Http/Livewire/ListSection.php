@@ -13,7 +13,7 @@ class ListSection extends Component
     public $selectedProject;
     public $new_list_name;
 
-    protected $listeners = ['refreshListSection' => '$refresh'];
+    protected $listeners = ['refreshListSection' => '$refresh', 'updateSelectedList'];
 
     public function render()
     {
@@ -32,4 +32,7 @@ class ListSection extends Component
         $this->new_list_name = null;
     }
 
+    public function updateSelectedList($listId) {
+        $this->selectedList = $listId;
+    }
 }
