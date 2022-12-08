@@ -13,9 +13,11 @@ class TaskItem extends Component
     public $taskId;
     public $listId;
     public $deleted = false;
+    public $rename_task_input;
 
     public function render()
     {
+        $this->rename_task_input = $this->name;
         return view('livewire.task-item');
     }
 
@@ -51,5 +53,17 @@ class TaskItem extends Component
         $this->emit('refreshTasklist', $this->listId);
         $this->emit('refreshListItem');
         $this->emit('refreshListSection');
+    }
+
+    public function renameItem($taskId) {
+        $currentItem = Item::where('id', $taskId)
+            ->where('user_id', Auth::id())
+            ->get();
+
+        $currentItem[0]->name = $this->rename_task_input;
+        $currentItem[0]->save();
+           
+        $this->name = $this->rename_task_input;
+        $this->emit('refreshTasklist', $this->listId);
     }
 }

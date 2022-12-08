@@ -7,18 +7,7 @@
                 <button id="new_list" class="h-8 w-8 bg-gray-400 text-gray-100 font-bold text-xl rounded-full ml-auto absolute right-0">+</button>
             </div>
             <div id="project_lists" class="flex flex-col gap-2" >
-                <div id="new_list_entry" class="flex bg-gray-200 rounded-full px-4 h-8 cursor-pointer hidden" >
-                    <form wire:submit.prevent="store" onsubmit="formAdded()">
-                        @csrf
-
-                        <input id="new_list_input" type="text" name="new_list_name" class="h-full border-none bg-transparent p-0 focus:border-none focus:ring-0" placeholder="Name your list..." wire:model.defer="new_list_name">
-                        <input type="submit" class="hidden">
-                    </form>
-                    <div id="arrow" class="ml-auto flex">
-                        <img src="../images/arrow-right.svg" alt="">
-                    </div>
-                </div>
-                <livewire:list-section :lists=$lists selectedList="{{ $selectedList }}" projectId="{{ $selectedProject }}" />
+                <livewire:list-section selectedList="{{ $selectedList }}" selectedProject="{{ $selectedProject }}" />
             </div>
         </div>
         <div id="list_view" class="pl-4 sm:pl-6 w-full">
@@ -69,8 +58,16 @@
             showTaskEntry();
         }
 
-        function formAdded() {
-            
+        function renameItem(taskId) {
+            var form = document.querySelector("#item-" + taskId + " #rename_task_form");
+            var formInput = document.querySelector("#item-" + taskId + " #rename_task_input");
+            var taskName = document.querySelector("#item-" + taskId + " #item_name");
+            var TasktapTarget = document.querySelector("#item-" + taskId + " #completion_tap_target");
+
+            form.classList.remove("hidden");
+            taskName.classList.add("hidden");
+            TasktapTarget.classList.remove("grow");
+            formInput.select();
         }
 
     </script>

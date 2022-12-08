@@ -1,4 +1,16 @@
 <div>
+    <div id="new_list_entry" class="list flex bg-gray-200 pl-4 h-8 items-center rounded-full mb-2 hidden" >
+        <form wire:submit.prevent="store" onsubmit="formAdded()">
+            @csrf
+
+            <input id="new_list_input" type="text" name="new_list_name" class="h-full border-none bg-transparent p-0 focus:border-none focus:ring-0" placeholder="Name your list..." wire:model.defer="new_list_name">
+            <input type="submit" class="hidden">
+        </form>
+        <div id="arrow" class="ml-auto flex mr-4">
+            <img src="../images/arrow-right.svg" alt="">
+        </div>
+    </div>
+
     <div id="incomplete_lists">
         @foreach($lists as $list)
             @if(!$list->completed)

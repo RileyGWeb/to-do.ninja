@@ -16,8 +16,9 @@ class ListItem extends Component
     public $totalCompleted = 0;
     public $selectedList;
     public $completed = false;
+    public $touch = false;
 
-    public $listeners = ['refreshListItem' => '$refresh'];
+    protected $listeners = ['refreshListItem' => '$refresh'];
 
     public function render()
     {
@@ -44,6 +45,10 @@ class ListItem extends Component
             $currentList[0]->completed = 0;
             $currentList[0]->save();
         }
+
+        if($this->touch) {
+            // dd($this->selectedList);
+        }
         
         return view('livewire.list-item');
     }
@@ -51,13 +56,14 @@ class ListItem extends Component
     public function switchList($listId)
     {
         // change active list, which means refreshing the task-list component and passing a new selectedProject and selectedList
-        $this->emit('refreshTasklist', $listId);
+        $this->touch = true;
         $this->selectedList = $listId;
-        // dd($this->selectedList);
+        $this->emit('refreshTasklist', $listId);
+        $this->emit('refreshListSection');
         // change url
     }
 
-    public function testtest() {
+    public function getItems() {
         dd("fdsafasdf");
     }
 }
