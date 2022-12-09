@@ -19,7 +19,7 @@ class ListSection extends Component
     {
         $this->lists = ItemList::where('user_id', Auth::id())
         ->where('project_id', $this->selectedProject)
-        ->orderByDesc('created_at')
+        ->orderBy('order')
         ->get();
         return view('livewire.list-section');
     }

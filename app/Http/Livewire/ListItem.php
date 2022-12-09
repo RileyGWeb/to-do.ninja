@@ -16,9 +16,9 @@ class ListItem extends Component
     public $totalCompleted = 0;
     public $selectedList;
     public $completed = false;
-    public $touch = false;
+    public $order;
 
-    protected $listeners = ['refreshListItem' => '$refresh'];
+    protected $listeners = ['refreshListItem' => '$refresh', 'setOrder', 'setTaskOrder'];
 
     public function render()
     {
@@ -45,10 +45,6 @@ class ListItem extends Component
             $currentList[0]->completed = 0;
             $currentList[0]->save();
         }
-
-        if($this->touch) {
-            // dd($this->selectedList);
-        }
         
         return view('livewire.list-item');
     }
@@ -60,11 +56,23 @@ class ListItem extends Component
         $this->selectedList = $listId;
         $this->emit('refreshTasklist', $listId);
         $this->emit('updateSelectedList', $listId);
-        
-        // change url
     }
 
-    public function getItems() {
-        dd("fdsafasdf");
+    public function setListOrder($listId, $order) {
+        $list = ItemList::where('user_id', Auth::id())
+        ->where('id', $listId)
+        ->get();
+
+        $list[0]->order = $order;
+        $list[0]->save();
+    }
+
+    public function setTaskOrder($taskId, $order) {
+        $task = Item::where('user_id', Auth::id())
+        ->where('id', $taskId)
+        ->get();
+
+        $task[0]->order = $order;
+        $task[0]->save();
     }
 }

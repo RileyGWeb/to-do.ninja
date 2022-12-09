@@ -7,11 +7,13 @@
     </form>
     <hr class="mx-12 my-4 border-gray-300">
     <div id="list_items">
-        @foreach($tasks as $task)
-            @if(!$task->completed)
-                <livewire:task-item name="{{ $task->name }}" completed="{{ $task->completed }}" taskId="{{ $task->id }}" listId="{{ $selectedList }}" wire:key="task-item-{{ $task->id }}" />
-            @endif
-        @endforeach
+        <div id="incomplete_tasks">
+            @foreach($tasks as $task)
+                @if(!$task->completed)
+                    <livewire:task-item name="{{ $task->name }}" completed="{{ $task->completed }}" taskId="{{ $task->id }}" order="{{ $task->order }}" listId="{{ $selectedList }}" wire:key="task-item-{{ $task->id }}" />
+                @endif
+            @endforeach
+        </div>
         
         @foreach($tasks as $task)
             <div id="completed_seperator" class="flex items-center mb-2 mt-6">

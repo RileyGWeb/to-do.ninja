@@ -19,6 +19,7 @@ return new class extends Migration
             $table->unsignedBigInteger('user_id');
             $table->string('name');
             $table->boolean('completed')->default(false);
+            $table->integer('order')->nullable();
             $table->timestamps();
 
             // One-to-many on projects table

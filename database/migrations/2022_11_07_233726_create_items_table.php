@@ -19,6 +19,7 @@ return new class extends Migration
             $table->unsignedBigInteger('project_id');
             $table->unsignedBigInteger('user_id');
             $table->string('name');
+            $table->integer('order')->nullable();
             $table->boolean('completed')->default(false);
             $table->timestamps();
 

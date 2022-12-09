@@ -1,4 +1,4 @@
-<div id="item-{{ $taskId }}" class="bg-white rounded-full border border-gray-300 mb-2 flex cursor-pointer @if($deleted) hidden @endif">
+<div id="item-{{ $taskId }}" taskId="{{ $taskId }}" order="{{ $order }}" class="task @if($completed == 0) incomplete @endif bg-white rounded-full border border-gray-300 mb-2 flex cursor-pointer @if($deleted) hidden @endif">
     <div id="completion_tap_target" class="flex grow p-2 group" wire:click="completeItem({{ $taskId }})">
         @if ($completed)
             <div id="checkbox" class="h-6 w-6 border-gray-200 bg-gradient-to-r from-[#FFE000] to-[#FFC200] flex items-center justify-center rounded-full">

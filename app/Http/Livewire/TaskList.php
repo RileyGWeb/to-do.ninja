@@ -28,6 +28,7 @@ class TaskList extends Component
         $this->tasks = Item::where('user_id', Auth::id())
         ->where('project_id', $this->selectedProject)
         ->where('list_id', $this->selectedList)
+        ->orderby('order')
         ->get();
         
         return view('livewire.task-list');

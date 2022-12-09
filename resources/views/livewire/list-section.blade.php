@@ -1,6 +1,6 @@
 <div>
-    <div id="new_list_entry" class="list flex bg-gray-200 pl-4 h-8 items-center rounded-full mb-2 hidden" >
-        <form wire:submit.prevent="store">
+    <div id="new_list_entry" class="flex bg-gray-200 pl-4 h-8 items-center rounded-full mb-2 hidden" >
+        <form wire:submit.prevent="store" onSubmit="listAdded()">
             @csrf
 
             <input id="new_list_input" type="text" name="new_list_name" class="h-full border-none bg-transparent p-0 focus:border-none focus:ring-0" placeholder="Name your list..." wire:model.defer="new_list_name">
@@ -14,7 +14,7 @@
     <div id="incomplete_lists">
         @foreach($lists as $list)
             @if(!$list->completed)
-                <livewire:list-item name="{{ $list->name }}" listId="{{ $list->id }}" selectedList="{{ $selectedList }}" projectId="{{ $selectedProject }}" wire:key="list-item-{{ $list->id }}" />
+                <livewire:list-item name="{{ $list->name }}" listId="{{ $list->id }}" selectedList="{{ $selectedList }}" order="{{ $list->order }}" projectId="{{ $selectedProject }}" wire:key="list-item-{{ $list->id }}" />
             @endif
         @endforeach
     </div>
@@ -33,7 +33,7 @@
     <div id="completed_lists">
         @foreach($lists as $list)
             @if($list->completed)
-                <livewire:list-item name="{{ $list->name }}" listId="{{ $list->id }}" selectedList="{{ $selectedList }}" projectId="{{ $selectedProject }}" wire:key="list-item-{{ $list->id }}" />
+                <livewire:list-item name="{{ $list->name }}" listId="{{ $list->id }}" selectedList="{{ $selectedList }}" order="9999" projectId="{{ $selectedProject }}" wire:key="list-item-{{ $list->id }}" />
             @endif
         @endforeach
     </div>

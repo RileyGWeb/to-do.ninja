@@ -45,5 +45,37 @@
         function clearText() {
             document.getElementById("project_name").value = '';
         }
+
+        // // Dragula, drag & drop and order
+        var drakeTasks = dragula([document.querySelector('#incomplete_tasks')]).on('dragend', function(el) {
+            setTaskOrders();
+        });
+
+        // Remove and re-add drag & drop to task list
+        function taskAdded() {
+            drakeTasks.destroy();
+            drakeTasks = dragula([document.querySelector('#incomplete_tasks')]).on('dragend', function(el) { 
+                // call setListOrders() when the user drops their dragged item
+                setTaskOrders();
+            });
+        }
+
+        
+        // Refresh all 'order' properties on the list DOM elements, and call 'setOrder' on the component to store this order in the database
+        function setTaskOrders() {
+            var index = 0;
+            var alltasks = document.querySelectorAll('.task.incomplete');
+
+            alltasks.forEach( (task) => {
+                task.setAttribute('order', index);
+                index++;
+            });
+
+            alltasks.forEach( (task) => {
+                var taskId = task.getAttribute('taskId');
+                var order = task.getAttribute('order')
+                Livewire.emit('setTaskOrder', taskId, order);
+            });
+        }
     </script>
 </div>

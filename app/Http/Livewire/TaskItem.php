@@ -14,6 +14,7 @@ class TaskItem extends Component
     public $listId;
     public $deleted = false;
     public $rename_task_input;
+    public $order;
 
     public function render()
     {
