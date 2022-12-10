@@ -10,7 +10,7 @@
                 <livewire:list-section selectedList="{{ $selectedList }}" selectedProject="{{ $selectedProject }}" />
             </div>
         </div>
-        <div id="list_view" class="pl-4 sm:pl-6 w-full">
+        <div id="list_view" class="pl-4 sm:pl-6 w-full relative">
             <livewire:task-list selectedProject="{{ $selectedProject }}" selectedList="{{ $selectedList }}" />
         </div>
     </div>
@@ -40,6 +40,8 @@
             var selectedProjectId = @js($selectedProject);
             var url = '/project-' + selectedProjectId + '/list-' + listId;
             history.pushState({}, '', url);
+
+            document.getElementById("incomplete_tasks").classList.add("hidden");
 
             showTaskEntry();
         }

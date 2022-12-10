@@ -2,14 +2,26 @@
     <div class="max-w-5xl mx-auto my-12" wire:init="loadProjects()"> 
         <h1 class="text-4xl text-center mb-4">Projects</h1>
         <div id="projects" class="grid grid-cols-5 gap-4">
-            @foreach($projects as $val)
-                <a href="/project-{{ $val['id'] }}" id="project" class="h-full w-full border-2 border-gray-300 aspect-square rounded-[1.25rem] text-2xl flex items-center justify-center text-slate-500 cursor-pointer select-none hover:bg-gray-200 transition-all">
-                    {{ $val['name'] }}
-                </a>
-            @endforeach
+            <div id="incomplete_projects">
+                @foreach($projects as $project)
+                    <a href="/project-{{ $project['id'] }}" id="project" class="h-full w-full border-2 border-gray-300 aspect-square rounded-[1.25rem] text-2xl flex items-center justify-center text-slate-500 cursor-pointer select-none hover:bg-gray-200 transition-all">
+                        {{ $project['name'] }}
+                    </a>
+                @endforeach
+            </div>
             <div id="project_add" class="@if(!$projects) hidden @endif h-full w-full border-dashed border-2 border-gray-300 aspect-square rounded-[1.25rem] text-8xl flex items-center justify-center text-slate-300 cursor-pointer select-none hover:bg-gray-200 hover:text-slate-500 hover:border-gray-300 hover:border-solid transition-all" type="button" data-modal-toggle="addProjectModal"  onClick="clearText()">
                 +
             </div>
+            @foreach($projects as $project)
+                @if($project->completed)
+                    <div id="completed_seperator" class="flex items-center mb-2 mt-6">
+                        <hr class="w-8 border-gray-500">
+                        <span class="mx-2 text-gray-500">Completed</span> 
+                        <hr class="w-full border-gray-500">
+                    </div>
+                    @break
+                @endif
+            @endforeach
         </div>
     </div>
 
@@ -47,14 +59,14 @@
         }
 
         // // Dragula, drag & drop and order
-        var drakeTasks = dragula([document.querySelector('#incomplete_tasks')]).on('dragend', function(el) {
+        var drakeProjects = dragula([document.querySelector('#incomplete_projects')]).on('dragend', function(el) {
             setTaskOrders();
         });
 
         // Remove and re-add drag & drop to task list
-        function taskAdded() {
-            drakeTasks.destroy();
-            drakeTasks = dragula([document.querySelector('#incomplete_tasks')]).on('dragend', function(el) { 
+        function projectAdded() {
+            drakeProjects.destroy();
+            drakeProjects = dragula([document.querySelector('#incomplete_projects')]).on('dragend', function(el) { 
                 // call setListOrders() when the user drops their dragged item
                 setTaskOrders();
             });
@@ -64,14 +76,14 @@
         // Refresh all 'order' properties on the list DOM elements, and call 'setOrder' on the component to store this order in the database
         function setTaskOrders() {
             var index = 0;
-            var alltasks = document.querySelectorAll('.task.incomplete');
+            var allProjects = document.querySelectorAll('.task.incomplete');
 
-            alltasks.forEach( (task) => {
+            allProjects.forEach( (task) => {
                 task.setAttribute('order', index);
                 index++;
             });
 
-            alltasks.forEach( (task) => {
+            allProjects.forEach( (task) => {
                 var taskId = task.getAttribute('taskId');
                 var order = task.getAttribute('order')
                 Livewire.emit('setTaskOrder', taskId, order);

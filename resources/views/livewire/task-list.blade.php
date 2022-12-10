@@ -1,4 +1,4 @@
-<div>
+<div id="task_list">
     <h2 class="w-full text-center text-2xl mb-6 font-julius">{{ $listName }}</h2>
     <form wire:submit.prevent="store" id="new_item" class="flex hidden" wire:ignore>
         <input type="text" id="new_item_input" name="new_item_name" class="w-full rounded-full mr-4 border-gray-300 pl-4" placeholder="It all starts with a task..." wire:model.defer.debounce.5ms="new_item_name" >
@@ -6,7 +6,7 @@
         <input type="submit" class="hidden">
     </form>
     <hr class="mx-12 my-4 border-gray-300">
-    <div id="list_items">
+    <div id="list_items" wire:loading.remove>
         <div id="incomplete_tasks">
             @foreach($tasks as $task)
                 @if(!$task->completed)
