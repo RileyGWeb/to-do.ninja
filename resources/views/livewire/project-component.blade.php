@@ -1,5 +1,11 @@
 <div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 h-full">
-    <h1 class="text-4xl text-center mb-4">{{ $project[0]->name }}</h1>
+    <h1 class="text-4xl text-center mb-4" onClick="renameProject()">{{ $project[0]->name }}</h1>
+    <form id="rename_project_form" wire:submit.prevent="renameProject({{ $project[0]->id }})" class="hidden">
+        @csrf
+
+        <input id="rename_project_input" type="text" name="rename_project_input" class="w-full border-none bg-transparent p-0 focus:border-none focus:ring-0 mb-4 text-4xl text-center" wire:model.defer="rename_project_input">
+        <input type="submit" class="hidden">
+    </form>
     <div id="project_view" class="flex border border-gray-400 rounded-[2rem] p-4 sm:p-6 min-h-[500px]">
         <div id="project_lists" class="flex flex-col border-r border-gray-400 pr-4 sm:pr-6">
             <div id="title_area" class="flex w-64 relative h-9 items-center mb-6">
@@ -70,6 +76,24 @@
             form.classList.remove("hidden");
             taskName.classList.add("hidden");
             TasktapTarget.classList.remove("grow");
+            formInput.select();
+        }
+        function renameList() {
+            var form = document.querySelector("#task_list #rename_list_form");
+            var formInput = document.querySelector("#task_list #rename_list_input");
+            var listName = document.querySelector("#task_list h2");
+
+            form.classList.remove("hidden");
+            listName.classList.add("hidden");
+            formInput.select();
+        }
+        function renameProject() {
+            var form = document.querySelector("#rename_project_form");
+            var formInput = document.querySelector("#rename_project_input");
+            var listName = document.querySelector("h1");
+
+            form.classList.remove("hidden");
+            listName.classList.add("hidden");
             formInput.select();
         }
 

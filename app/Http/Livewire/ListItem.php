@@ -17,8 +17,14 @@ class ListItem extends Component
     public $selectedList;
     public $completed = false;
     public $order;
+    public $touch = false;
 
-    protected $listeners = ['refreshListItem' => '$refresh', 'setOrder', 'setTaskOrder'];
+    protected $listeners = [
+        'refreshListItem' => '$refresh', 
+        'setOrder', 
+        'setTaskOrder',
+        'touch'
+    ];
 
     public function render()
     {
@@ -45,14 +51,18 @@ class ListItem extends Component
             $currentList[0]->completed = 0;
             $currentList[0]->save();
         }
+
+        $this->name = $currentList[0]->name;
         
+        // if($this->touch) {
+            // dd($currentList);
+        // }
         return view('livewire.list-item');
     }
 
     public function switchList($listId)
     {
         // change active list, which means refreshing the task-list component and passing a new selectedProject and selectedList
-        $this->touch = true;
         $this->selectedList = $listId;
         $this->emit('refreshTasklist', $listId);
         $this->emit('updateSelectedList', $listId);
@@ -74,5 +84,10 @@ class ListItem extends Component
 
         $task[0]->order = $order;
         $task[0]->save();
+    }
+
+    public function touch()
+    {
+        $this->touch = true;
     }
 }

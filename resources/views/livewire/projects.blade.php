@@ -1,27 +1,59 @@
 <div>
     <div class="max-w-5xl mx-auto my-12" wire:init="loadProjects()"> 
         <h1 class="text-4xl text-center mb-4">Projects</h1>
-        <div id="projects" class="grid grid-cols-5 gap-4">
-            <div id="incomplete_projects">
+        <div id="projects" class="flex flex-col gap-4">
+            <div id="incomplete_projects" class="grid grid-cols-5 gap-4">
                 @foreach($projects as $project)
-                    <a href="/project-{{ $project['id'] }}" id="project" class="h-full w-full border-2 border-gray-300 aspect-square rounded-[1.25rem] text-2xl flex items-center justify-center text-slate-500 cursor-pointer select-none hover:bg-gray-200 transition-all">
-                        {{ $project['name'] }}
-                    </a>
+                    @if(!$project->completed)
+                        <a href="/project-{{ $project['id'] }}" id="project" class="h-full w-full border-2 border-gray-300 aspect-square rounded-[1.25rem] text-2xl flex items-center justify-center text-slate-500 cursor-pointer select-none hover:bg-gray-200 transition-all flex flex-col p-2 text-center relative">
+                            <div class="line-clamp-3">{{ $project['name'] }}</div>
+                            <div id="project_info" class="text-sm absolute bottom-0 w-full">
+                                <span class="absolute bottom-2 left-4">Lists: {{ $project['completed_lists'] }}/{{ $project['total_lists'] }}</span>
+                                <span class="absolute bottom-2 right-4">Tasks: {{ $project['completed_tasks'] }}/{{ $project['total_tasks'] }}</span>
+                            </div>
+                        </a>
+                    @endif
                 @endforeach
+
+                <div id="project_add" class="@if(!$projects) hidden @endif h-full w-full border-dashed border-2 border-gray-300 aspect-square rounded-[1.25rem] text-8xl flex items-center justify-center text-slate-300 cursor-pointer select-none hover:bg-gray-200 hover:text-slate-500 hover:border-gray-300 hover:border-solid transition-all" type="button" data-modal-toggle="addProjectModal"  onClick="clearText()">
+                    +
+                </div>
             </div>
-            <div id="project_add" class="@if(!$projects) hidden @endif h-full w-full border-dashed border-2 border-gray-300 aspect-square rounded-[1.25rem] text-8xl flex items-center justify-center text-slate-300 cursor-pointer select-none hover:bg-gray-200 hover:text-slate-500 hover:border-gray-300 hover:border-solid transition-all" type="button" data-modal-toggle="addProjectModal"  onClick="clearText()">
-                +
+
+            
+
+            <div id="completed_projects" x-data="{ open: true }">
+                @foreach($projects as $project)
+                    @if($project->completed)
+                        <div id="completed_seperator" class="flex items-center mb-4 py-1 px-4 mt-6 rounded-lg transition cursor-pointer hover:bg-gray-200" x-on:click="open = ! open">
+                            <hr class="w-8 border-gray-500">
+                            <span class="mx-2 text-gray-500 whitespace-nowrap">Completed ({{ $totalCompleted }})</span> 
+                            <hr class="w-full border-gray-500">
+                            <div id="arrow" class="ml-auto flex w-10 justify-center rotate-90 transition" :class="open ? '' : '!rotate-180'">
+                                <img src="../images/arrow-right.svg" alt="" class="w-2.5">
+                            </div>
+                        </div>
+                        @break
+                    @endif
+                @endforeach
+
+                <div class="grid grid-cols-5 gap-4" x-show="open" x-transition>
+                    @foreach($projects as $project)
+                        @if($project->completed)
+                            <a href="/project-{{ $project['id'] }}" id="project" class="h-full w-full border-2 border-gray-300 aspect-square rounded-[1.25rem] text-2xl flex items-center justify-center text-slate-500 cursor-pointer select-none hover:bg-gray-200 transition-all flex flex-col p-2 text-center relative">
+                                <div id="checkbox" class="ml-auto mr-2.5 h-8 w-8 absolute left-2 top-2 border-gray-200 bg-gradient-to-r from-[#FFE000] to-[#FFC200] flex items-center justify-center rounded-full">
+                                    <img src="../images/Line.svg" alt="checkmark" class="h-5 w-5">
+                                </div>
+                                <div class="line-clamp-3 @if($project->completed) text-slate-400 line-through @endif">{{ $project['name'] }}</div>
+                                <div id="project_info" class="text-sm absolute bottom-0 w-full">
+                                    <span class="absolute bottom-2 left-4 @if($project->completed) text-slate-400 line-through @endif">Lists: {{ $project['completed_lists'] }}/{{ $project['total_lists'] }}</span>
+                                    <span class="absolute bottom-2 right-4 @if($project->completed) text-slate-400 line-through @endif">Tasks: {{ $project['completed_tasks'] }}/{{ $project['total_tasks'] }}</span>
+                                </div>
+                            </a>
+                        @endif
+                    @endforeach
+                </div>
             </div>
-            @foreach($projects as $project)
-                @if($project->completed)
-                    <div id="completed_seperator" class="flex items-center mb-2 mt-6">
-                        <hr class="w-8 border-gray-500">
-                        <span class="mx-2 text-gray-500">Completed</span> 
-                        <hr class="w-full border-gray-500">
-                    </div>
-                    @break
-                @endif
-            @endforeach
         </div>
     </div>
 

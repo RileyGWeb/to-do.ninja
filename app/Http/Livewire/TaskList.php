@@ -12,8 +12,10 @@ class TaskList extends Component
     public $selectedProject;
     public $selectedList;
     public $listName;
+    public $listId;
     public $tasks;
     public $new_item_name = null;
+    public $rename_list_input;
 
     public $listeners = [
         'refreshTasklist'
@@ -25,6 +27,8 @@ class TaskList extends Component
         if (!count($currentList) == 0) {
             $this->listName = $currentList[0]->name;
         } 
+        $this->rename_list_input = $this->listName;
+        $this->listId = $this->selectedList;
         $this->tasks = Item::where('user_id', Auth::id())
         ->where('project_id', $this->selectedProject)
         ->where('list_id', $this->selectedList)
@@ -51,5 +55,20 @@ class TaskList extends Component
         ->where('project_id', $this->selectedProject)
         ->where('list_id', $this->selectedList)
         ->get();
+    }
+
+    public function renameList($listId)
+    {
+        $currentList = ItemList::where('id', $listId)
+            ->where('user_id', Auth::id())
+            ->get();
+
+        $currentList[0]->name = $this->rename_list_input;
+        $currentList[0]->save();
+           
+        $this->name = $this->rename_list_input;
+        $this->emit('refreshTasklist', $listId);
+        $this->emit('refreshListItem');
+        $this->emit('touch');
     }
 }

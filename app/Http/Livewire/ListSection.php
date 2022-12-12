@@ -12,8 +12,9 @@ class ListSection extends Component
     public $selectedList;
     public $selectedProject;
     public $new_list_name;
+    public $touch;
 
-    protected $listeners = ['refreshListSection' => '$refresh', 'updateSelectedList'];
+    protected $listeners = ['refreshListSection' => '$refresh', 'updateSelectedList', 'touch'];
 
     public function render()
     {
@@ -21,6 +22,9 @@ class ListSection extends Component
         ->where('project_id', $this->selectedProject)
         ->orderBy('order')
         ->get();
+        if($this->touch) {
+            // dd($this->lists);
+        }
         return view('livewire.list-section');
     }
 
@@ -34,5 +38,13 @@ class ListSection extends Component
 
     public function updateSelectedList($listId) {
         $this->selectedList = $listId;
+    }
+    public function touch()
+    {
+        $this->touch = true;
+        $this->lists = ItemList::where('user_id', Auth::id())
+        ->where('project_id', $this->selectedProject)
+        ->orderBy('order')
+        ->get();
     }
 }
