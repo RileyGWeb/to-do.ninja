@@ -85,4 +85,12 @@ class Projects extends Component
             Project::create($this->project_name);
         }
     }
+    
+    public function deleteProject($projectId)
+    {
+        dd($projectId);
+        Project::where('id', $projectId)
+            ->where('user_id', Auth::id())
+            ->delete();
+    }
 }

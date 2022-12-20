@@ -1,6 +1,7 @@
 <div>
     <div class="max-w-5xl mx-auto my-12" wire:init="loadProjects()"> 
-        <h1 class="text-4xl text-center mb-4">Projects</h1>
+        <div id="overlay" class="absolute top-0 right-0 left-0 bottom-0 bg-slate-500 opacity-20 z-40 hidden"></div>
+        <h1 class="text-4xl text-center mb-4" >Projects</h1>
         <div id="projects" class="flex flex-col gap-4">
             <div id="incomplete_projects" class="grid grid-cols-5 gap-4">
                 @foreach($projects as $project)
@@ -21,8 +22,8 @@
                                     <path d="M3 0C1.45 0 0.190002 1.26 0.190002 2.81C0.190002 4.35 1.45 5.60999 3 5.60999C4.55 5.60999 5.81 4.35 5.81 2.81C5.81 1.26 4.55 0 3 0Z" fill="#64748b"/>
                                 </svg>
                             </div>
-                            <div x-show="open" @click.outside="open = false" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="transform opacity-100 scale-100" x-transition:leave-end="transform opacity-0 scale-95" class="absolute z-50 rounded-lg shadow-lg origin-top-right right-2 top-14">
-                                <div data-modal-toggle="deleteProjectConfirmationModal" class="rounded-md bg-white p-4 border border-gray-200 select-none cursor-pointer hover:bg-gray-100">Delete</div>
+                            <div x-show="open" @click.outside="open = false" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="transform opacity-100 scale-100" x-transition:leave-end="transform opacity-0 scale-95" class="absolute z-30 rounded-lg shadow-lg origin-top-right right-2 top-14">
+                                <div x-on:click="open = ! open" onClick="toggleConfirmationModal({{ $project->id }})" class="rounded-md bg-white p-4 border border-gray-200 select-none cursor-pointer hover:bg-gray-100">Delete</div>
                             </div>
                         </div>
                         
@@ -108,14 +109,14 @@
     </div>
 
     <!-- Are you sure you want to delete? modal -->
-    <div id="deleteProjectConfirmationModal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 w-full md:inset-0 h-modal md:h-full items-center justify-center" wire:ignore>
+    <div id="deleteProjectConfirmationModal" tabindex="-2" aria-hidden="true" class="hidden flex overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 w-full md:inset-0 h-modal md:h-full items-center justify-center" wire:ignore>
         <div class="relative p-4 w-full max-w-xl h-full md:h-auto">
             <!-- Modal content -->
             <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
                 <!-- Modal header -->
                 <div class="flex justify-between items-start p-4 rounded-t border-b dark:border-gray-600">
                     <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
-                        Create new project
+                        Are you sure you want to delete?
                     </h3>
                     <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-toggle="deleteProjectConfirmationModal">
                         <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
@@ -124,12 +125,7 @@
                 </div>
                 <!-- Modal body -->
                 <div class="p-6 space-y-6">
-                    <form class="space-y-6" wire:submit.prevent="store">
-                        @csrf
-
-                        <input wire:model="project_name" name="project_name" id="project_name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="Very important project" required>
-                        <button type="submit" class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" data-modal-toggle="deleteProjectConfirmationModal">Oh yeah</button>
-                    </form>
+                    <button id="delete_button" class="w-full text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Yes, delete</button>
                 </div>
             </div>
         </div>
@@ -154,10 +150,20 @@
             });
         }
 
-        function showConfirmationModal() {
-
+        function toggleConfirmationModal(projectId) {
+            var modalNode = document.getElementById("deleteProjectConfirmationModal");
+            var overlayNode = document.getElementById("overlay");
+            var modalButtonNode = document.getElementById("delete_button");
+            if (modalNode.classList.contains("hidden")) {
+                modalNode.classList.remove("hidden");
+                overlayNode.classList.remove("hidden");
+                modalButtonNode.setAttribute("wire:click", "deleteProject(" + projectId + ")");
+            } else {
+                modalNode.classList.add("hidden");
+                overlayNode.classList.add("hidden");
+                modalButtonNode.removeAttribute("wire:click");
+            }
         }
-
         
         // Refresh all 'order' properties on the list DOM elements, and call 'setOrder' on the component to store this order in the database
         function setTaskOrders() {

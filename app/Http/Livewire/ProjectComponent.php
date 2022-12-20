@@ -37,11 +37,4 @@ class ProjectComponent extends Component
         $this->name = $this->rename_project_input;
         // $this->emit('refreshProjectlist', $this->listId);
     }
-
-    public function deleteProject($projectId)
-    {
-        Project::where('id', $projectId)
-            ->where('user_id', Auth::id())
-            ->delete();
-    }
 }
