@@ -6,8 +6,8 @@
         <input id="rename_project_input" type="text" name="rename_project_input" class="w-full border-none bg-transparent p-0 focus:border-none focus:ring-0 mb-4 text-4xl text-center" wire:model.defer="rename_project_input">
         <input type="submit" class="hidden">
     </form>
-    <div id="project_view" class="flex border border-gray-400 rounded-[2rem] p-4 sm:p-6 min-h-[500px]">
-        <div id="project_lists" class="flex flex-col border-r border-gray-400 pr-4 sm:pr-6">
+    <div id="project_view" class="flex border border-gray-400 rounded-[2rem] p-4 sm:p-6 min-h-[500px] relative">
+        <div id="project_lists" class="hidden lg:flex flex-col border-r border-gray-400 pr-4 sm:pr-6">
             <div id="title_area" class="flex w-64 relative h-9 items-center mb-6">
                 <h2 class="w-full text-center text-2xl font-julius">Lists</h2>
                 <button id="new_list" class="h-8 w-8 bg-gray-400 text-gray-100 font-bold text-xl rounded-full ml-auto absolute right-0">+</button>
@@ -16,7 +16,15 @@
                 <livewire:list-section selectedList="{{ $selectedList }}" selectedProject="{{ $selectedProject }}" />
             </div>
         </div>
-        <div id="list_view" class="pl-4 sm:pl-6 w-full relative">
+        <button class="bg-gray-200 px-2 py-1 rounded absolute left-8 block lg:hidden z-50 text-xl font-julius flex items-center">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M5 6H19" stroke="#6B7280" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M5 18H19" stroke="#6B7280" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M5 12H19" stroke="#6B7280" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span class="leading-4" style="color: #6B7280;">Lists</span>
+        </button>
+        <div id="list_view" class="pl-0 lg:pl-6 w-full relative">
             <livewire:task-list selectedProject="{{ $selectedProject }}" selectedList="{{ $selectedList }}" />
         </div>
     </div>

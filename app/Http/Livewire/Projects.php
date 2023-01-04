@@ -15,7 +15,7 @@ class Projects extends Component
     public $project_name;
     public $totalCompleted;
 
-    protected $listeners = ['projectAdded' => '$refresh'];
+    protected $listeners = ['projectAdded' => '$refresh', 'deleteProject'];
 
     public function loadProjects()
     {
@@ -88,7 +88,6 @@ class Projects extends Component
     
     public function deleteProject($projectId)
     {
-        dd($projectId);
         Project::where('id', $projectId)
             ->where('user_id', Auth::id())
             ->delete();

@@ -9,7 +9,7 @@
                 <img src="../images/Line.svg" alt="checkmark" class="h-4 w-4 hidden group-hover:block">
             </div>
         @endif
-        <div id="item_name" class="mx-2 @if($completed) text-slate-500 line-through @endif">{{ $name }}</div>
+        <div id="item_name" class="mx-2 @if($completed) text-slate-500 line-through @endif truncate">{{ $name }}</div>
     </div>
     <form id="rename_task_form" wire:submit.prevent="renameItem({{ $taskId }})" class="hidden mr-2">
         @csrf
@@ -17,7 +17,7 @@
         <input id="rename_task_input" type="text" name="rename_task_input" class="h-full border-none bg-transparent p-0 focus:border-none focus:ring-0" wire:model.defer="rename_task_input">
         <input type="submit" class="hidden">
     </form>
-    <div id="actions" class="ml-auto mr-2 flex gap-4 items-center">
+    <div id="actions" class="ml-auto mr-2 flex gap-4 items-center min-w-[3.75rem]">
         <div id="more" class="group" onClick="renameItem({{ $taskId }})">
             <img src="../images/edit.svg" class="group-hover:invert-[50]">
         </div>
