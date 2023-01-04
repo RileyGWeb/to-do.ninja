@@ -66,9 +66,12 @@
                 var taskEntry = document.getElementById('new_item').classList.remove('hidden');  
             }
         }
-        document.querySelector(".list").addEventListener("click", function() {
-            showTaskEntry();
-        });
+        var list = document.querySelector(".list");
+        if (list != null) {
+            list.addEventListener("click", function() {
+                showTaskEntry();
+            });
+        }
         
         // If the URL contains 'list', that means a list is selected and we need to show the "add task" area
         if (window.location.href.indexOf('list') != -1) {
@@ -107,7 +110,7 @@
 
         // // Dragula, drag & drop and order
         // Initialize drag & drop on page load
-        var drakeList = dragula([document.querySelector('#incomplete_lists')]).on('dragend', function(el) {
+        var drakeLists = dragula([document.querySelector('#incomplete_lists')]).on('dragend', function(el) {
             setListOrders();
         });
         var drakeTasks = dragula([document.querySelector('#incomplete_tasks')]).on('dragend', function(el) {
@@ -116,7 +119,10 @@
 
         // Remove and re-add drag & drop to list section
         function listAdded() {
-            drakeLists.destroy();
+            
+            if(drakeLists != null) {
+                drakeLists.destroy();
+            }
             drakeLists = dragula([document.querySelector('#incomplete_lists')]).on('dragend', function(el) { 
                 // call setListOrders() when the user drops their dragged item
                 setListOrders();

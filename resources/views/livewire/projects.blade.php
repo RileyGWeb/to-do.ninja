@@ -35,10 +35,10 @@
                 </div>
             </div>            
 
-            <div id="completed_projects" x-data="{ open: true }">
+            <div id="completed_projects" x-data="{ openBig: false }">
                 @foreach($projects as $project)
                     @if($project->completed)
-                        <div id="completed_seperator" class="flex items-center mb-4 py-1 px-4 mt-6 rounded-lg transition cursor-pointer hover:bg-gray-200" x-on:click="open = ! open">
+                        <div id="completed_seperator" class="flex items-center mb-4 py-1 px-4 mt-6 rounded-lg transition cursor-pointer hover:bg-gray-200" x-on:click="openBig = ! openBig">
                             <hr class="w-8 border-gray-500">
                             <span class="mx-2 text-gray-500 whitespace-nowrap">Completed ({{ $totalCompleted }})</span> 
                             <hr class="w-full border-gray-500">
@@ -50,29 +50,34 @@
                     @endif
                 @endforeach
 
-                <div class="grid grid-cols-5 gap-4" x-show="open" x-transition>
+                <div class="grid grid-cols-5 gap-4" x-show="openBig" x-transition>
                     @foreach($projects as $project)
                         @if($project->completed)
 
-                        <div class="relative">
-                            <a href="/project-{{ $project['id'] }}" id="project" class="peer h-full w-full border-2 border-gray-300 aspect-square rounded-[1.25rem] text-2xl flex items-center justify-center text-slate-500 cursor-pointer select-none hover:bg-gray-200 transition-all flex flex-col p-2 text-center relative">
-                                <div id="checkbox" class="ml-auto mr-2.5 h-8 w-8 absolute left-2 top-2 border-gray-200 bg-gradient-to-r from-[#FFE000] to-[#FFC200] flex items-center justify-center rounded-full">
-                                    <img src="../images/Line.svg" alt="checkmark" class="h-5 w-5">
+                            <div class="relative" x-data="{ open: false }">
+                                <a href="/project-{{ $project['id'] }}" id="project" class="peer h-full w-full border-2 border-gray-300 aspect-square rounded-[1.25rem] text-2xl flex items-center justify-center text-slate-500 cursor-pointer select-none hover:bg-gray-200 transition-all flex flex-col p-2 text-center">
+                                    <div id="checkbox" class="ml-auto mr-2.5 h-8 w-8 absolute left-2 top-2 border-gray-200 bg-gradient-to-r from-[#FFE000] to-[#FFC200] flex items-center justify-center rounded-full">
+                                        <img src="../images/Line.svg" alt="checkmark" class="h-5 w-5">
+                                    </div>
+                                        
+                                    <div class="line-clamp-3 @if($project->completed) text-slate-400 line-through @endif">{{ $project['name'] }}</div>
+                                    <div id="project_info" class="text-sm absolute bottom-0 w-full">
+                                        <span class="absolute bottom-2 left-4 @if($project->completed) text-slate-400 line-through @endif">Lists: {{ $project['completed_lists'] }}/{{ $project['total_lists'] }}</span>
+                                        <span class="absolute bottom-2 right-4 @if($project->completed) text-slate-400 line-through @endif">Tasks: {{ $project['completed_tasks'] }}/{{ $project['total_tasks'] }}</span>
+                                    </div>
+                                </a>
+                                <div id="menu" x-on:click="open = ! open" class="absolute top-4 right-2 hover:bg-gray-300 w-8 h-8 flex items-center justify-center rounded-full opacity-0 peer-hover:opacity-50 hover:opacity-100 z-50 cursor-pointer">
+                                    <svg width="6" height="20" viewBox="0 0 6 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M3 14.39C1.45 14.39 0.190002 15.65 0.190002 17.19C0.190002 18.74 1.45 20 3 20C4.55 20 5.81 18.74 5.81 17.19C5.81 15.65 4.55 14.39 3 14.39Z" fill="#64748b"/>
+                                        <path d="M3 12.81C4.55192 12.81 5.81 11.5519 5.81 10C5.81 8.44808 4.55192 7.19 3 7.19C1.44808 7.19 0.190002 8.44808 0.190002 10C0.190002 11.5519 1.44808 12.81 3 12.81Z" fill="#64748b"/>
+                                        <path d="M3 0C1.45 0 0.190002 1.26 0.190002 2.81C0.190002 4.35 1.45 5.60999 3 5.60999C4.55 5.60999 5.81 4.35 5.81 2.81C5.81 1.26 4.55 0 3 0Z" fill="#64748b"/>
+                                    </svg>
                                 </div>
-                                <div class="line-clamp-3 @if($project->completed) text-slate-400 line-through @endif">{{ $project['name'] }}</div>
-                                <div id="project_info" class="text-sm absolute bottom-0 w-full">
-                                    <span class="absolute bottom-2 left-4 @if($project->completed) text-slate-400 line-through @endif">Lists: {{ $project['completed_lists'] }}/{{ $project['total_lists'] }}</span>
-                                    <span class="absolute bottom-2 right-4 @if($project->completed) text-slate-400 line-through @endif">Tasks: {{ $project['completed_tasks'] }}/{{ $project['total_tasks'] }}</span>
+                                <div x-show="open" @click.outside="open = false" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="transform opacity-100 scale-100" x-transition:leave-end="transform opacity-0 scale-95" class="absolute z-30 rounded-lg shadow-lg origin-top-right right-2 top-14">
+                                    <div x-on:click="open = ! open" onClick="toggleConfirmationModal({{ $project->id }})" class="rounded-md bg-white p-4 border border-gray-200 select-none cursor-pointer hover:bg-gray-100">Delete</div>
                                 </div>
-                            </a>
-                            <div id="menu" class="absolute top-4 right-2 hover:bg-gray-300 w-8 h-8 flex items-center justify-center rounded-full opacity-0 peer-hover:opacity-50 hover:opacity-100 z-50 cursor-pointer">
-                                <svg width="6" height="20" viewBox="0 0 6 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M3 14.39C1.45 14.39 0.190002 15.65 0.190002 17.19C0.190002 18.74 1.45 20 3 20C4.55 20 5.81 18.74 5.81 17.19C5.81 15.65 4.55 14.39 3 14.39Z" fill="#64748b"/>
-                                    <path d="M3 12.81C4.55192 12.81 5.81 11.5519 5.81 10C5.81 8.44808 4.55192 7.19 3 7.19C1.44808 7.19 0.190002 8.44808 0.190002 10C0.190002 11.5519 1.44808 12.81 3 12.81Z" fill="#64748b"/>
-                                    <path d="M3 0C1.45 0 0.190002 1.26 0.190002 2.81C0.190002 4.35 1.45 5.60999 3 5.60999C4.55 5.60999 5.81 4.35 5.81 2.81C5.81 1.26 4.55 0 3 0Z" fill="#64748b"/>
-                                </svg>
                             </div>
-                        </div>
+
                         @endif
                     @endforeach
                 </div>
@@ -118,7 +123,7 @@
                     <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                         Are you sure you want to delete? This is permanent.
                     </h3>
-                    <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-toggle="deleteProjectConfirmationModal">
+                    <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white" onClick="hideDeleteModal()">
                         <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
                         <span class="sr-only">Close modal</span>
                     </button>
@@ -169,6 +174,11 @@
             console.log(projectId);
             Livewire.emit('deleteProject', projectId);
             document.getElementById("deleteProjectConfirmationModal").classList.add("hidden");
+        }
+
+        function hideDeleteModal() {
+            document.getElementById("deleteProjectConfirmationModal").classList.add("hidden");
+            document.getElementById("overlay").classList.add("hidden");
         }
 
         // Refresh all 'order' properties on the list DOM elements, and call 'setOrder' on the component to store this order in the database
