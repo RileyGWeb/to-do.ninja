@@ -48,6 +48,22 @@
     <body class="font-sans antialiased">
         <x-jet-banner />
 
+        <div id="mobile_overlay" class="absolute top-0 right-0 bottom-0 left-0 bg-gray-400 z-50 flex lg:hidden items-center justify-center flex-col p-2 text-align-center">
+            <h3 class="text-2xl">Screen too small!</h3>
+            <p class="text-center">This application is not optimized for mobile (I know, I know). Minium viewport size of <b>1128px</b></p>
+            <p>Your screen size: <b><span id="size"></span></b></p>
+        </div>
+
+        <script>
+            function updateSize() {
+                var screenWidth = Math.round(window.innerWidth * 1.1);
+                document.getElementById("size").innerHTML = screenWidth + "px";
+            }
+
+            updateSize();
+            window.addEventListener("resize", updateSize);
+        </script>
+
         <div class="min-h-screen bg-gray-100">
             @livewire('navigation-menu')
 
