@@ -19,7 +19,10 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['*'],
+    'allowed_origins' => [
+        'https://to-do.ninja',
+        'https://www.to-do.ninja',
+    ],
 
     'allowed_origins_patterns' => [],
 
