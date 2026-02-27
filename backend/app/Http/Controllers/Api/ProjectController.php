@@ -11,6 +11,7 @@ class ProjectController extends Controller
     public function index(Request $request)
     {
         $projects = $request->user()->projects()
+            ->with(['taskLists.tasks'])
             ->orderBy('sort_order')
             ->orderBy('created_at')
             ->get()
@@ -68,14 +69,16 @@ class ProjectController extends Controller
         $project->taskLists->each(function ($list) {
             $totalTasks = $list->tasks->count();
             $completedTasks = $list->tasks->where('completed', true)->count();
-            $list->total_tasks = $totalTasks;
-            $list->completed_tasks = $completedTasks;
-
+            
             $isCompleted = $totalTasks > 0 && $totalTasks === $completedTasks;
             if ($list->completed !== $isCompleted) {
                 $list->completed = $isCompleted;
                 $list->save();
             }
+            
+            // Set these after save to avoid trying to persist them
+            $list->total_tasks = $totalTasks;
+            $list->completed_tasks = $completedTasks;
         });
 
         $totalLists = $project->taskLists->count();

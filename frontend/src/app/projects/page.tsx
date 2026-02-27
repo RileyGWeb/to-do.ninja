@@ -16,6 +16,8 @@ export default function ProjectsPage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [newProjectName, setNewProjectName] = useState('');
   const [completedOpen, setCompletedOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchExpanded, setSearchExpanded] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -26,6 +28,7 @@ export default function ProjectsPage() {
   const fetchProjects = useCallback(async () => {
     try {
       const data = await api.getProjects();
+      console.log('Fetched projects with nested data:', data);
       setProjects(data);
     } catch {
       // ignore
@@ -63,6 +66,73 @@ export default function ProjectsPage() {
   const incompleteProjects = projects.filter((p) => !p.completed);
   const completedProjects = projects.filter((p) => p.completed);
 
+  // Search across projects, lists, tasks, and notes
+  const searchAllEntities = () => {
+    if (!searchQuery.trim()) {
+      return {
+        projects: [],
+        lists: [],
+        tasks: []
+      };
+    }
+
+    console.log('Searching with query:', searchQuery);
+    console.log('Available projects:', projects);
+
+    const query = searchQuery.toLowerCase();
+    const projectResults: Array<{ project: Project }> = [];
+    const listResults: Array<{ list: any; projectName: string; projectId: number }> = [];
+    const taskResults: Array<{ task: any; listName: string; projectName: string; projectId: number; listId: number }> = [];
+
+    projects.forEach(project => {
+      console.log('Checking project:', project.name, 'task_lists:', project.task_lists);
+      
+      // Search project name
+      if (project.name.toLowerCase().includes(query)) {
+        projectResults.push({ project });
+      }
+
+      // Search lists and tasks
+      (project.task_lists || []).forEach(list => {
+        console.log('  Checking list:', list.name, 'tasks:', list.tasks);
+        
+        if (list.name.toLowerCase().includes(query)) {
+          listResults.push({
+            list,
+            projectName: project.name,
+            projectId: project.id
+          });
+        }
+
+        // Search tasks
+        (list.tasks || []).forEach(task => {
+          const taskNameMatches = task.name.toLowerCase().includes(query);
+          const notesMatch = (task.notes || '').toLowerCase().includes(query);
+          
+          if (taskNameMatches || notesMatch) {
+            taskResults.push({
+              task,
+              listName: list.name,
+              projectName: project.name,
+              projectId: project.id,
+              listId: list.id
+            });
+          }
+        });
+      });
+    });
+
+    console.log('Search results:', { projectResults, listResults, taskResults });
+
+    return {
+      projects: projectResults,
+      lists: listResults,
+      tasks: taskResults
+    };
+  };
+
+  const searchResults = searchExpanded ? searchAllEntities() : { projects: [], lists: [], tasks: [] };
+
   if (loading || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -75,16 +145,163 @@ export default function ProjectsPage() {
     <div className="min-h-screen bg-gray-50">
       <Header />
       <div className="max-w-6xl mx-auto px-6 py-8">
-        <h1
-          className="text-3xl text-center text-gray-700 mb-8"
-          style={{ fontFamily: "'Julius Sans One', sans-serif" }}
-        >
-          Projects
-        </h1>
+        <div className="flex items-center justify-center gap-4 mb-8">
+          <h1
+            className="text-3xl text-center text-gray-700"
+            style={{ fontFamily: "'Julius Sans One', sans-serif" }}
+          >
+            Projects
+          </h1>
+          
+          {/* Search - Expandable */}
+          {searchExpanded ? (
+            <div className="relative flex items-center">
+              <svg 
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <circle cx="11" cy="11" r="8" strokeWidth="2" />
+                <path d="M21 21l-4.35-4.35" strokeWidth="2" strokeLinecap="round" />
+              </svg>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onBlur={() => {
+                  if (!searchQuery) {
+                    setSearchExpanded(false);
+                  }
+                }}
+                autoFocus
+                placeholder="Search projects..."
+                className="w-64 pl-10 pr-10 py-2 rounded-full border border-gray-300 text-sm focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => {
+                    setSearchQuery('');
+                    setSearchExpanded(false);
+                  }}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                  </svg>
+                </button>
+              )}
+            </div>
+          ) : (
+            <button
+              onClick={() => setSearchExpanded(true)}
+              className="p-2 text-gray-400 hover:text-gray-600 cursor-pointer"
+              title="Search projects"
+            >
+              <svg 
+                className="w-5 h-5" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <circle cx="11" cy="11" r="8" strokeWidth="2" />
+                <path d="M21 21l-4.35-4.35" strokeWidth="2" strokeLinecap="round" />
+              </svg>
+            </button>
+          )}
+        </div>
 
         {loadingProjects ? (
           <div className="flex justify-center py-12">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-400" />
+          </div>
+        ) : searchExpanded ? (
+          <div className="max-w-4xl mx-auto space-y-6">
+            {/* Search Results View */}
+            {searchQuery && (
+              <div className="text-center mb-4 text-sm text-gray-500">
+                Found {searchResults.projects.length} project{searchResults.projects.length !== 1 ? 's' : ''}, {searchResults.lists.length} list{searchResults.lists.length !== 1 ? 's' : ''}, {searchResults.tasks.length} task{searchResults.tasks.length !== 1 ? 's' : ''}
+              </div>
+            )}
+
+            {/* Projects Section */}
+            <div className="bg-white rounded-xl border border-gray-200 p-6">
+              <h2 className="text-lg font-semibold text-gray-700 mb-4">Projects</h2>
+              {searchResults.projects.length > 0 ? (
+                <div className="space-y-2">
+                  {searchResults.projects.map(({ project }) => (
+                    <button
+                      key={project.id}
+                      onClick={() => router.push(`/projects/${project.id}`)}
+                      className="w-full text-left px-4 py-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer"
+                    >
+                      <div className="font-medium text-gray-800">{project.name}</div>
+                      <div className="text-sm text-gray-500 mt-1">
+                        {project.task_lists?.length || 0} list{project.task_lists?.length !== 1 ? 's' : ''}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-400 text-sm">
+                  {searchQuery ? 'No projects found' : 'Start typing to search...'}
+                </div>
+              )}
+            </div>
+
+            {/* Lists Section */}
+            <div className="bg-white rounded-xl border border-gray-200 p-6">
+              <h2 className="text-lg font-semibold text-gray-700 mb-4">Lists</h2>
+              {searchResults.lists.length > 0 ? (
+                <div className="space-y-2">
+                  {searchResults.lists.map(({ list, projectName, projectId }, idx) => (
+                    <button
+                      key={`${projectId}-${list.id}`}
+                      onClick={() => router.push(`/projects/${projectId}`)}
+                      className="w-full text-left px-4 py-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer"
+                    >
+                      <div className="font-medium text-gray-800">{list.name}</div>
+                      <div className="text-sm text-gray-500 mt-1">
+                        in {projectName} • {list.total_tasks || 0} task{list.total_tasks !== 1 ? 's' : ''}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-400 text-sm">
+                  {searchQuery ? 'No lists found' : 'Start typing to search...'}
+                </div>
+              )}
+            </div>
+
+            {/* Tasks Section */}
+            <div className="bg-white rounded-xl border border-gray-200 p-6">
+              <h2 className="text-lg font-semibold text-gray-700 mb-4">Tasks</h2>
+              {searchResults.tasks.length > 0 ? (
+                <div className="space-y-2">
+                  {searchResults.tasks.map(({ task, listName, projectName, projectId }, idx) => (
+                    <button
+                      key={`${projectId}-${task.id}`}
+                      onClick={() => router.push(`/projects/${projectId}`)}
+                      className="w-full text-left px-4 py-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer"
+                    >
+                      <div className="font-medium text-gray-800">{task.name}</div>
+                      <div className="text-sm text-gray-500 mt-1">
+                        in {listName} • {projectName}
+                      </div>
+                      {task.notes && (
+                        <div className="text-xs text-gray-400 mt-1 line-clamp-2">{task.notes}</div>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-400 text-sm">
+                  {searchQuery ? 'No tasks found' : 'Start typing to search...'}
+                </div>
+              )}
+            </div>
           </div>
         ) : (
           <div className="flex flex-col gap-6">

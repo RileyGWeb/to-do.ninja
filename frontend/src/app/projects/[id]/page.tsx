@@ -22,7 +22,11 @@ export default function ProjectDetailPage() {
   const [newListName, setNewListName] = useState('');
   const [showNewListInput, setShowNewListInput] = useState(false);
   const [newTaskName, setNewTaskName] = useState('');
+  const [deleteConfirmListId, setDeleteConfirmListId] = useState<number | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchExpanded, setSearchExpanded] = useState(false);
   const newListInputRef = useRef<HTMLInputElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -52,8 +56,6 @@ export default function ProjectDetailPage() {
   useEffect(() => {
     if (user) fetchProject();
   }, [user, fetchProject]);
-
-  const selectedList = project?.task_lists?.find((l) => l.id === selectedListId) || null;
 
   const handleRenameProject = async (name: string) => {
     await api.updateProject(projectId, { name });
@@ -131,34 +133,169 @@ export default function ProjectDetailPage() {
 
   if (!project) return null;
 
-  const incompleteLists = (project.task_lists || []).filter((l) => !l.completed);
-  const completedLists = (project.task_lists || []).filter((l) => l.completed);
+  // Filter lists and tasks based on search query
+  const filterListsAndTasks = () => {
+    if (!searchQuery.trim()) {
+      return {
+        lists: project.task_lists || [],
+        allMatch: true
+      };
+    }
+
+    const query = searchQuery.toLowerCase();
+    const filteredLists = (project.task_lists || []).map(list => {
+      const listNameMatches = list.name.toLowerCase().includes(query);
+      
+      // Filter tasks within this list
+      const filteredTasks = (list.tasks || []).filter(task => {
+        const taskNameMatches = task.name.toLowerCase().includes(query);
+        const notesMatch = (task.notes || '').toLowerCase().includes(query);
+        return taskNameMatches || notesMatch;
+      });
+
+      // Include list if its name matches OR if it has matching tasks
+      if (listNameMatches || filteredTasks.length > 0) {
+        return {
+          ...list,
+          tasks: filteredTasks,
+          _allTasksMatch: listNameMatches // If list name matches, show all tasks
+        };
+      }
+      return null;
+    }).filter(Boolean);
+
+    return {
+      lists: filteredLists,
+      allMatch: false
+    };
+  };
+
+  const { lists: filteredLists, allMatch } = filterListsAndTasks();
+
+  const incompleteLists = (filteredLists as TaskList[]).filter((l) => !l.completed);
+  const completedLists = (filteredLists as TaskList[]).filter((l) => l.completed);
+
+  // Get selected list from filtered lists (or from original if showing all tasks in a matching list)
+  let selectedList = (filteredLists as TaskList[]).find((l) => l.id === selectedListId) || null;
+  
+  // If we have a search query and the selected list exists in original but not filtered, 
+  // it means the list doesn't match the search
+  if (searchQuery && !selectedList && selectedListId) {
+    const originalList = project?.task_lists?.find((l) => l.id === selectedListId);
+    if (originalList) {
+      // List exists but doesn't match search, so clear selection
+      selectedList = null;
+    }
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="h-screen bg-gray-50 flex flex-col overflow-hidden">
       <Header />
-      <div className="max-w-6xl mx-auto px-4 py-6">
-        <div className="text-center mb-6">
-          <InlineEdit
-            value={project.name}
-            onSave={handleRenameProject}
-            className="text-3xl text-gray-700"
-            tag="h1"
-            inputClassName="text-3xl text-gray-700 text-center"
-          />
+      <div className="flex-1 overflow-hidden flex flex-col">
+        <div className="max-w-6xl mx-auto px-4 py-6 w-full flex flex-col h-full overflow-hidden">
+        {/* Header with back button and title */}
+        <div className="mb-4 flex-shrink-0">
+          <button
+            onClick={() => router.push('/projects')}
+            className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 cursor-pointer mb-3"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <polyline points="15,18 9,12 15,6" />
+            </svg>
+            <span className="hidden sm:inline">Back to Projects</span>
+            <span className="sm:hidden">Back</span>
+          </button>
+          <div className="text-center">
+            <InlineEdit
+              value={project.name}
+              onSave={handleRenameProject}
+              className="text-2xl sm:text-3xl text-gray-700 break-words"
+              tag="h1"
+              inputClassName="text-2xl sm:text-3xl text-gray-700 text-center w-full"
+            />
+          </div>
         </div>
 
-        <div className="flex items-center justify-end mb-2">
+        <div className="flex items-center justify-end gap-4 mb-2 flex-shrink-0">
+          {/* Search - Expandable */}
+          <div className="flex items-center gap-2">
+            {searchExpanded ? (
+              <div className="relative flex items-center">
+                <svg 
+                  className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <circle cx="11" cy="11" r="8" strokeWidth="2" />
+                  <path d="M21 21l-4.35-4.35" strokeWidth="2" strokeLinecap="round" />
+                </svg>
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onBlur={() => {
+                    if (!searchQuery) {
+                      setSearchExpanded(false);
+                    }
+                  }}
+                  placeholder="Search lists, tasks, notes..."
+                  className="w-64 pl-10 pr-10 py-2 rounded-full border border-gray-300 text-sm focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => {
+                      setSearchQuery('');
+                      setSearchExpanded(false);
+                    }}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <line x1="18" y1="6" x2="6" y2="18" />
+                      <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                  </button>
+                )}
+              </div>
+            ) : (
+              <button
+                onClick={() => {
+                  setSearchExpanded(true);
+                  setTimeout(() => searchInputRef.current?.focus(), 0);
+                }}
+                className="p-2 text-gray-400 hover:text-gray-600 cursor-pointer"
+                title="Search"
+              >
+                <svg 
+                  className="w-5 h-5" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <circle cx="11" cy="11" r="8" strokeWidth="2" />
+                  <path d="M21 21l-4.35-4.35" strokeWidth="2" strokeLinecap="round" />
+                </svg>
+              </button>
+            )}
+          </div>
+
           <button
             onClick={() => setShowTaskOptions(!showTaskOptions)}
-            className="text-xs text-gray-400 hover:text-gray-600 cursor-pointer"
+            className="text-xs text-gray-400 hover:text-gray-600 cursor-pointer whitespace-nowrap"
           >
             {showTaskOptions ? 'hide task options' : 'show task options'}
           </button>
         </div>
 
-        {/* Mobile: toggle button */}
-        <div className="md:hidden mb-4">
+        {searchQuery && (
+          <div className="mb-2 flex-shrink-0 text-sm text-gray-500">
+            Found {incompleteLists.length + completedLists.length} list{incompleteLists.length + completedLists.length !== 1 ? 's' : ''}
+          </div>
+        )}
+
+        {/* Mobile/Tablet: toggle button */}
+        <div className="lg:hidden mb-4 flex-shrink-0">
           <button
             onClick={() => setMobileShowLists(!mobileShowLists)}
             className="flex items-center gap-2 text-sm text-gray-500 px-3 py-2 rounded-lg border border-gray-300 cursor-pointer"
@@ -172,97 +309,122 @@ export default function ProjectDetailPage() {
           </button>
         </div>
 
-        <div className="flex gap-4">
-          {/* Lists Sidebar */}
-          <div className={`${mobileShowLists ? 'block' : 'hidden'} md:block w-full md:w-64 flex-shrink-0`}>
-            <div className="bg-white rounded-xl border border-gray-200 p-4">
-              <div className="flex items-center justify-between mb-3">
-                <h3
-                  className="text-sm tracking-wider text-gray-500"
-                  style={{ fontFamily: "'Julius Sans One', sans-serif" }}
-                >
-                  LISTS
-                </h3>
-                <button
-                  onClick={() => setShowNewListInput(true)}
-                  className="w-6 h-6 bg-gray-400 text-white rounded-full flex items-center justify-center text-xs hover:bg-gray-500 cursor-pointer"
-                >
-                  +
-                </button>
-              </div>
+        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden flex-1 flex flex-col min-h-0">
+          <div className="flex relative flex-1 overflow-hidden min-h-0">
+            {/* Backdrop for mobile/tablet */}
+            {mobileShowLists && (
+              <div 
+                className="absolute inset-0 bg-black/20 z-40 lg:hidden"
+                onClick={() => setMobileShowLists(false)}
+              />
+            )}
 
-              {showNewListInput && (
-                <form
-                  onSubmit={(e) => { e.preventDefault(); handleAddList(); }}
-                  className="mb-2"
-                >
-                  <div className="flex bg-gray-100 rounded-full h-8 items-center px-3">
-                    <input
-                      ref={newListInputRef}
-                      type="text"
-                      value={newListName}
-                      onChange={(e) => setNewListName(e.target.value)}
-                      onBlur={() => { if (!newListName.trim()) setShowNewListInput(false); }}
-                      placeholder="Name your list..."
-                      className="bg-transparent border-none outline-none text-sm flex-1 focus:ring-0 p-0"
-                    />
-                  </div>
-                </form>
-              )}
+            {/* Lists Sidebar - Slideover on mobile/tablet, normal on desktop */}
+            <div className={`
+              ${mobileShowLists ? 'translate-x-0' : '-translate-x-full'}
+              lg:translate-x-0
+              absolute lg:relative
+              top-0 left-0
+              bottom-0
+              w-64
+              bg-white
+              transition-transform duration-300 ease-in-out
+              z-50 lg:z-auto
+              flex-shrink-0
+              border-r border-gray-200 lg:border-r
+              flex flex-col
+            `}>
+              <div className="p-4 overflow-y-auto flex-1">
+                <div className="flex items-center justify-between mb-3">
+                  <h3
+                    className="text-sm tracking-wider text-gray-500"
+                    style={{ fontFamily: "'Julius Sans One', sans-serif" }}
+                  >
+                    LISTS
+                  </h3>
+                  <button
+                    onClick={() => setShowNewListInput(true)}
+                    className="w-6 h-6 bg-gray-400 text-white rounded-full flex items-center justify-center text-xs hover:bg-gray-500 cursor-pointer"
+                  >
+                    +
+                  </button>
+                </div>
 
-              <div className="space-y-1">
-                {incompleteLists.map((list) => (
-                  <ListSidebarItem
-                    key={list.id}
-                    list={list}
-                    isSelected={selectedListId === list.id}
-                    onClick={() => { setSelectedListId(list.id); setMobileShowLists(false); }}
-                  />
-                ))}
-              </div>
-
-              {completedLists.length > 0 && (
-                <CompletedSection label="Completed">
-                  <div className="space-y-1">
-                    {completedLists.map((list) => (
-                      <ListSidebarItem
-                        key={list.id}
-                        list={list}
-                        isSelected={selectedListId === list.id}
-                        completed
-                        onClick={() => { setSelectedListId(list.id); setMobileShowLists(false); }}
+                {showNewListInput && (
+                  <form
+                    onSubmit={(e) => { e.preventDefault(); handleAddList(); }}
+                    className="mb-2"
+                  >
+                    <div className="flex bg-gray-100 rounded-full h-8 items-center px-3">
+                      <input
+                        ref={newListInputRef}
+                        type="text"
+                        value={newListName}
+                        onChange={(e) => setNewListName(e.target.value)}
+                        onBlur={() => { if (!newListName.trim()) setShowNewListInput(false); }}
+                        placeholder="Name your list..."
+                        className="bg-transparent border-none outline-none text-sm flex-1 focus:ring-0 p-0"
                       />
-                    ))}
-                  </div>
-                </CompletedSection>
-              )}
-            </div>
-          </div>
+                    </div>
+                  </form>
+                )}
 
-          {/* Task Panel */}
-          <div className="flex-1 min-w-0">
-            {selectedList ? (
-              <div className="bg-white rounded-xl border border-gray-200 p-6">
-                <div className="text-center mb-4">
+                <div className="space-y-1">
+                  {incompleteLists.map((list) => (
+                    <ListSidebarItem
+                      key={list.id}
+                      list={list}
+                      isSelected={selectedListId === list.id}
+                      onClick={() => { setSelectedListId(list.id); setMobileShowLists(false); }}
+                    />
+                  ))}
+                </div>
+
+                {completedLists.length > 0 && (
+                  <CompletedSection label="Completed">
+                    <div className="space-y-1">
+                      {completedLists.map((list) => (
+                        <ListSidebarItem
+                          key={list.id}
+                          list={list}
+                          isSelected={selectedListId === list.id}
+                          completed
+                          onClick={() => { setSelectedListId(list.id); setMobileShowLists(false); }}
+                        />
+                      ))}
+                    </div>
+                  </CompletedSection>
+                )}
+              </div>
+            </div>
+
+            {/* Task Panel */}
+            <div className="flex-1 min-w-0 p-4 sm:p-6 overflow-y-auto">
+              {selectedList ? (
+                <>
+                  <div className="relative text-center mb-4">
+                  {showTaskOptions && (
+                    <button
+                      onClick={() => setDeleteConfirmListId(selectedList.id)}
+                      className="absolute right-0 top-0 text-gray-300 hover:text-red-500 cursor-pointer"
+                      title="Delete list"
+                    >
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                        <polyline points="3,6 5,6 21,6" />
+                        <path d="M19,6V20a2,2,0,0,1-2,2H7a2,2,0,0,1-2-2V6M8,6V4a2,2,0,0,1,2-2h4a2,2,0,0,1,2,2V6" />
+                      </svg>
+                    </button>
+                  )}
                   <InlineEdit
                     value={selectedList.name}
                     onSave={(name) => handleRenameList(selectedList.id, name)}
-                    className="text-xl text-gray-600 tracking-wider"
+                    className="text-lg sm:text-xl text-gray-600 tracking-wider break-words px-8"
                     tag="h2"
-                    inputClassName="text-xl text-gray-600 text-center tracking-wider"
+                    inputClassName="text-lg sm:text-xl text-gray-600 text-center tracking-wider w-full"
                   />
-
-                  {showTaskOptions && (
-                    <button
-                      onClick={() => handleDeleteList(selectedList.id)}
-                      className="text-xs text-red-400 hover:text-red-600 mt-1 cursor-pointer"
-                    >
-                      Delete list
-                    </button>
-                  )}
                 </div>
 
-                <form onSubmit={handleAddTask} className="flex gap-3 mb-4">
+                <form onSubmit={handleAddTask} className="flex flex-col sm:flex-row gap-3 mb-4">
                   <input
                     type="text"
                     value={newTaskName}
@@ -278,28 +440,62 @@ export default function ProjectDetailPage() {
                   </button>
                 </form>
 
-                <hr className="mx-8 my-3 border-gray-200" />
+                <hr className="mx-4 sm:mx-8 my-3 border-gray-200" />
 
                 <TaskListView
                   tasks={selectedList.tasks || []}
                   showOptions={showTaskOptions}
+                  searchQuery={searchQuery}
                   onToggle={handleToggleTask}
                   onDelete={handleDeleteTask}
                   onRename={handleRenameTask}
                   onUpdateNotes={handleUpdateTaskNotes}
                   onReorder={(taskIds) => handleTaskReorder(selectedList.id, taskIds)}
                 />
-              </div>
+              </>
             ) : (
-              <div className="bg-white rounded-xl border border-gray-200 p-6 text-center text-gray-400">
+              <div className="p-6 text-center text-gray-400">
                 {(project.task_lists || []).length === 0
                   ? 'Create a list to get started'
                   : 'Select a list to view tasks'}
               </div>
             )}
+            </div>
           </div>
         </div>
       </div>
+      </div>
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirmListId && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl p-6 max-w-sm w-full shadow-xl">
+            <h3 className="text-lg font-semibold text-gray-800 mb-2">Delete List?</h3>
+            <p className="text-gray-600 text-sm mb-6">
+              Are you sure you want to delete this list? All tasks in this list will be permanently deleted.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setDeleteConfirmListId(null)}
+                className="px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  if (deleteConfirmListId) {
+                    handleDeleteList(deleteConfirmListId);
+                    setDeleteConfirmListId(null);
+                  }
+                }}
+                className="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-colors cursor-pointer"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -367,9 +563,10 @@ function CompletedSection({ label, children }: { label: string; children: React.
   );
 }
 
-function TaskListView({ tasks, showOptions, onToggle, onDelete, onRename, onUpdateNotes, onReorder }: {
+function TaskListView({ tasks, showOptions, searchQuery, onToggle, onDelete, onRename, onUpdateNotes, onReorder }: {
   tasks: Task[];
   showOptions: boolean;
+  searchQuery?: string;
   onToggle: (task: Task) => void;
   onDelete: (taskId: number) => void;
   onRename: (taskId: number, name: string) => void;
@@ -384,6 +581,7 @@ function TaskListView({ tasks, showOptions, onToggle, onDelete, onRename, onUpda
       <DraggableTaskList
         tasks={incompleteTasks}
         showOptions={showOptions}
+        searchQuery={searchQuery}
         onToggle={onToggle}
         onDelete={onDelete}
         onRename={onRename}
@@ -400,6 +598,7 @@ function TaskListView({ tasks, showOptions, onToggle, onDelete, onRename, onUpda
                 key={task.id}
                 task={task}
                 showOptions={showOptions}
+                searchQuery={searchQuery}
                 onToggle={() => onToggle(task)}
                 onDelete={() => onDelete(task.id)}
                 onRename={(name) => onRename(task.id, name)}
@@ -413,9 +612,10 @@ function TaskListView({ tasks, showOptions, onToggle, onDelete, onRename, onUpda
   );
 }
 
-function DraggableTaskList({ tasks, showOptions, onToggle, onDelete, onRename, onUpdateNotes, onReorder, allTasks }: {
+function DraggableTaskList({ tasks, showOptions, searchQuery, onToggle, onDelete, onRename, onUpdateNotes, onReorder, allTasks }: {
   tasks: Task[];
   showOptions: boolean;
+  searchQuery?: string;
   onToggle: (task: Task) => void;
   onDelete: (taskId: number) => void;
   onRename: (taskId: number, name: string) => void;
@@ -483,6 +683,7 @@ function DraggableTaskList({ tasks, showOptions, onToggle, onDelete, onRename, o
           <TaskItem
             task={task}
             showOptions={showOptions}
+            searchQuery={searchQuery}
             onToggle={() => onToggle(task)}
             onDelete={() => onDelete(task.id)}
             onRename={(name) => onRename(task.id, name)}
@@ -494,9 +695,10 @@ function DraggableTaskList({ tasks, showOptions, onToggle, onDelete, onRename, o
   );
 }
 
-function TaskItem({ task, showOptions, onToggle, onDelete, onRename, onUpdateNotes }: {
+function TaskItem({ task, showOptions, searchQuery, onToggle, onDelete, onRename, onUpdateNotes }: {
   task: Task;
   showOptions: boolean;
+  searchQuery?: string;
   onToggle: () => void;
   onDelete: () => void;
   onRename: (name: string) => void;
@@ -504,14 +706,28 @@ function TaskItem({ task, showOptions, onToggle, onDelete, onRename, onUpdateNot
 }) {
   const [expanded, setExpanded] = useState(false);
   const [notesValue, setNotesValue] = useState(task.notes || '');
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     setNotesValue(task.notes || '');
   }, [task.notes]);
 
-  const handleNotesBlur = () => {
+  const saveNotes = async () => {
     if (notesValue !== (task.notes || '')) {
-      onUpdateNotes(notesValue);
+      setSaving(true);
+      await onUpdateNotes(notesValue);
+      setTimeout(() => setSaving(false), 500);
+    }
+  };
+
+  const handleNotesBlur = () => {
+    saveNotes();
+  };
+
+  const handleNotesKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+      e.preventDefault();
+      saveNotes();
     }
   };
 
@@ -569,16 +785,32 @@ function TaskItem({ task, showOptions, onToggle, onDelete, onRename, onUpdateNot
         )}
       </div>
 
-      {expanded && showOptions && (
-        <div className="ml-10 mr-4 mt-1 mb-2">
-          <textarea
-            value={notesValue}
-            onChange={(e) => setNotesValue(e.target.value)}
-            onBlur={handleNotesBlur}
-            placeholder="Add notes..."
-            className="w-full text-sm text-gray-500 border border-gray-200 rounded-lg p-2 focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 resize-none"
-            rows={3}
-          />
+      {expanded && (
+        <div className="ml-8 mr-2 mt-3 mb-2">
+          <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
+            <label className="block text-xs font-medium text-gray-500 mb-2">
+              NOTES
+            </label>
+            <div className="relative">
+              <textarea
+                value={notesValue}
+                onChange={(e) => setNotesValue(e.target.value)}
+                onBlur={handleNotesBlur}
+                onKeyDown={handleNotesKeyDown}
+                placeholder="Add notes here... (⌘+Enter to save)"
+                className="w-full text-sm text-gray-700 bg-white border border-gray-200 rounded-md p-3 focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 resize-none transition-colors"
+                rows={4}
+              />
+              {saving && (
+                <div className="absolute bottom-3 right-3 flex items-center gap-2 text-xs text-green-600 bg-green-50 px-2 py-1 rounded-md border border-green-200">
+                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                  Saved
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       )}
     </div>
